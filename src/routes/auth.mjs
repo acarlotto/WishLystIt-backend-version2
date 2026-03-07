@@ -19,3 +19,4 @@ router.post("/reset-password", resetPassword);
 router.post("/change-password", checkAuth, changePassword);
 
 export default router;
+// At the bottom of auth.mjs
