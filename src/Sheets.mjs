@@ -13,7 +13,7 @@ export const jwtClient = new google.auth.JWT({
   key: key.private_key,
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
-await jwtClient.authorize();
+// await jwtClient.authorize();
 
 // Initialize the Google Sheets API.
 export const spreadsheetId = process.env.SPREADSHEET_ID;
