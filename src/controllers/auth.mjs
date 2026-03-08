@@ -164,7 +164,7 @@ export const forgotPassword = async (req, res) => {
     });
 
     // send email with code
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "WishLystit <hello@wishlystit.com>",
       to: [user.email],
       subject: "Password Reset Code",
@@ -173,7 +173,12 @@ export const forgotPassword = async (req, res) => {
       <p>Thanks,</p>
       <p>WishLystit Team</p>`,
     });
-
+//added for error code
+    if (error) {
+      console.error("Resend error:", error);
+      return res.status(500).json({ message: "Failed to send email" });
+    }
+//end added for error code
     res.json({ message: "Code sent" });
   } catch (error) {
     console.log(error);
