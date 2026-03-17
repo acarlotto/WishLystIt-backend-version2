@@ -57,7 +57,11 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-const corsOptions = { origin: "*" };
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 app.options("*", cors(corsOptions));
 app.use(cors(corsOptions));
 
