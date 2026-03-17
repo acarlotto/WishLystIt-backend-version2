@@ -265,3 +265,23 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // delete user-related data
+    await Promise.all([
+      db.collection("users").deleteOne({ _id: userId }),
+      db.collection("sessions").deleteMany({ userId }),
+      db.collection("items").deleteMany({ userId }),
+      db.collection("sharing").deleteMany({ userId }),
+      db.collection("password-reset-codes").deleteMany({ userId }),
+    ]);
+
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};

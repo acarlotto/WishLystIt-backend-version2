@@ -7,6 +7,7 @@ import {
   login,
   resetPassword,
   signup,
+  deleteAccount,
 } from "../controllers/auth.mjs";
 
 const router = Router();
@@ -17,6 +18,7 @@ router.post("/signup", signup);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/change-password", checkAuth, changePassword);
+router.delete("/delete-account", checkAuth, deleteAccount);
 
 export default router;
 // At the bottom of auth.mjs

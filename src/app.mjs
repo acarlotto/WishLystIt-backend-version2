@@ -63,7 +63,11 @@ app.use(cors(corsOptions));
 
 const mongoClient = new MongoClient(process.env.MONGO_URI);
 export const db = mongoClient.db("wishlystit");
+
+
+console.log("RESEND_API_KEY set:", !!process.env.RESEND_API_KEY);
 // export const resend = new Resend(process.env.RESEND_API_KEY);
+
 export const resend = new Resend(process.env.RESEND_API_KEY || "placeholder");
 
 app.get("/", (req, res) => {
