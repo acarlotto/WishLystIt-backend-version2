@@ -5,7 +5,7 @@ import { createSheet, jwtClient, sheetExists } from "../Sheets.mjs";
 
 export const getItems = async (req, res) => {
   const page = req.query.page || 1;
-  const limit = 10;
+  const limit = 50;
   try {
     // get items from db by userId with pagination (10 items per page) and sort by createdAt, also return number of total items for pagination
     const items = await db
