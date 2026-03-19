@@ -119,3 +119,28 @@ export const deleteItem = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+//added for discover screen
+export const getDiscoverItems = async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const items = await db
+      .collection("items")
+      .find({ userId: new ObjectId(userId) })
+      .project({ userId: 1, title: 1, price: 1, image: 1, url: 1, color: 1, size: 1, createdAt: 1 })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .toArray();
+
+    res.json({ items });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
