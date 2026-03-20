@@ -14,6 +14,6 @@ router.get("/", checkAuth, getItems);
 router.get("/public", getPublicItems);
 router.post("/", checkAuth, addItem);
 router.delete("/:id", checkAuth, deleteItem);
-router.get("/items/discover", getDiscoverItems); // no auth needed — public route
+router.get("/discover", getDiscoverItems); // no auth needed — public route
 
 export default router;
