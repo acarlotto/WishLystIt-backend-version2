@@ -2,11 +2,11 @@ import { Router } from "express";
 import {
   addItem,
   deleteItem,
+  getDiscoverItems,
   getItems,
   getPublicItems,
 } from "../controllers/items.mjs";
 import { checkAuth } from "../controllers/auth.mjs";
-import { getDiscoverItems } from "../controllers/items.mjs"; // adjust path
 
 const router = Router();
 

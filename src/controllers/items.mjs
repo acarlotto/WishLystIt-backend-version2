@@ -120,22 +120,15 @@ export const deleteItem = async (req, res) => {
   }
 };
 
-//added for discover screen
+// discover page: up to 50 items from all users
 export const getDiscoverItems = async (req, res) => {
   try {
-    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
-    const { userId } = req.query;
-
-    if (!userId) {
-      return res.status(400).json({ message: "userId is required" });
-    }
-
     const items = await db
       .collection("items")
-      .find({ userId: new ObjectId(userId) })
-      .project({ userId: 1, title: 1, price: 1, image: 1, url: 1, color: 1, size: 1, createdAt: 1 })
+      .find()
+      .project({ userId: 0 })
       .sort({ createdAt: -1 })
-      .limit(limit)
+      .limit(50)
       .toArray();
 
     res.json({ items });
