@@ -62,13 +62,34 @@ const parsePriceValue = (rawPrice) => {
   return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
 };
 
+const resolveAnthropicModel = () => {
+  const configuredModel =
+    process.env.ANTHROPIC_MODEL ||
+    process.env.VISION_MODEL ||
+    "claude-3-5-sonnet-20241022";
+
+  const model = String(configuredModel).trim();
+  if (!model) {
+    throw new Error("ANTHROPIC_MODEL is empty");
+  }
+
+  // Anthropic request IDs look like req_xxx; fail fast with a clear error.
+  if (model.startsWith("req_")) {
+    throw new Error(
+      "Invalid ANTHROPIC_MODEL value: request IDs cannot be used as model names"
+    );
+  }
+
+  return model;
+};
+
 const callAnthropicVision = async ({ imageBase64, imageUrl }) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not configured");
   }
 
-  const model = process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-20241022";
+  const model = resolveAnthropicModel();
   const prompt = process.env.DISCOVER_VISION_PROMPT || `
 You are a fashion product analyst. Analyze the screenshot and identify one primary clothing item.
 Return ONLY valid JSON in this exact shape:
