@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { db } from "../app.mjs";
 import { google } from "googleapis";
 import { createSheet, jwtClient, sheetExists } from "../Sheets.mjs";
+import { discoverByImage as discoverByImageService } from "../services/discover.mjs";
 
 export const getItems = async (req, res) => {
   const page = req.query.page || 1;
@@ -135,5 +136,36 @@ export const getDiscoverItems = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const discoverByImage = async (req, res) => {
+  try {
+    const imageBase64 = req.body?.imageBase64;
+    const imageUrl = req.body?.imageUrl;
+    const rawLimit = Number.parseInt(req.body?.limit, 10);
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(rawLimit, 1), 50)
+      : 20;
+
+    if (!imageBase64 && !imageUrl) {
+      return res.status(400).json({
+        message: "Please provide imageBase64 or imageUrl",
+      });
+    }
+
+    const response = await discoverByImageService({
+      imageBase64,
+      imageUrl,
+      limit,
+    });
+
+    return res.json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Image discovery failed",
+      error: error.message,
+    });
   }
 };
