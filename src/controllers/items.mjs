@@ -79,6 +79,9 @@ export const addItem = async (req, res) => {
 
 const addItemToGoogleSheet = async (item, user) => {
   try {
+    if (!jwtClient || !process.env.SPREADSHEET_ID) {
+      return;
+    }
     // await jwtClient.authorize();
     const sheetsApi = google.sheets({ version: "v4", auth: jwtClient });
     const values = [item._id, item.price, item.url, user.email];

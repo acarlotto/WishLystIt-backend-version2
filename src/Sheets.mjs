@@ -2,18 +2,22 @@ import dotenv from "dotenv";
 dotenv.config();
 import { google } from "googleapis";
 
-const key = {
-  private_key: process.env.GCP_PRIVATE_KEY.replace(/\\n/gm, "\n"),
-  client_email: process.env.GCP_CLIENT_EMAIL,
-};
+function buildJwtClient() {
+  const raw = process.env.GCP_PRIVATE_KEY;
+  const client_email = process.env.GCP_CLIENT_EMAIL;
+  if (!raw || !client_email) {
+    return null;
+  }
+  const private_key = raw.replace(/\\n/gm, "\n");
+  return new google.auth.JWT({
+    email: client_email,
+    key: private_key,
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
+}
 
-// Authenticate with the Google Sheets API.
-export const jwtClient = new google.auth.JWT({
-  email: key.client_email,
-  key: key.private_key,
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-});
-// await jwtClient.authorize();
+// Authenticate with the Google Sheets API (optional — omit env vars to skip Sheets on startup).
+export const jwtClient = buildJwtClient();
 
 // Initialize the Google Sheets API.
 export const spreadsheetId = process.env.SPREADSHEET_ID;

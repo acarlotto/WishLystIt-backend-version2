@@ -82,6 +82,7 @@ app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/items", ItemsRouter);
 app.use("/api/v1/share", ShareRouter);
 
-app.listen(process.env.PORT || 3500, () => {
-  console.log(`app listening at http://localhost:${process.env.PORT || 3500}`);
+const port = Number.parseInt(process.env.PORT || "3500", 10);
+app.listen(port, "0.0.0.0", () => {
+  console.log(`app listening on 0.0.0.0:${port}`);
 });
