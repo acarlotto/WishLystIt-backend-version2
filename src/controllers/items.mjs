@@ -3,6 +3,12 @@ import { db } from "../app.mjs";
 import { google } from "googleapis";
 import { createSheet, jwtClient, sheetExists } from "../Sheets.mjs";
 import { discoverByImage as discoverByImageService } from "../services/discover.mjs";
+import {
+  checkPriceByProductName,
+  parseNumericPrice,
+  runPriceChecksOnce,
+  sendPriceDropPush,
+} from "../services/priceAlerts.mjs";
 
 export const getItems = async (req, res) => {
   const page = req.query.page || 1;
@@ -51,6 +57,7 @@ export const getPublicItems = async (req, res) => {
 
 export const addItem = async (req, res) => {
   try {
+    const savedPrice = parseNumericPrice(req.body.price);
     const item = {
       brand: req.body.brand,
       brandUrl: req.body.brandUrl,
@@ -60,6 +67,9 @@ export const addItem = async (req, res) => {
       url: req.body.url,
       color: req.body.color,
       size: req.body.size,
+      savedPrice,
+      currentPrice: savedPrice,
+      lastAlerted: null,
     };
 
     const result = await db.collection("items").insertOne({
@@ -168,6 +178,81 @@ export const discoverByImage = async (req, res) => {
     console.log(error);
     return res.status(500).json({
       message: "Image discovery failed",
+      error: error.message,
+    });
+  }
+};
+
+export const runManualPriceCheck = async (req, res) => {
+  try {
+    const startedAt = new Date();
+    const result = await runPriceChecksOnce({ userId: req.user?._id });
+    const finishedAt = new Date();
+    return res.json({
+      success: true,
+      startedAt,
+      finishedAt,
+      triggeredBy: req.user?.email || "authenticated-user",
+      checked: result?.checked ?? 0,
+      notified: result?.notified ?? 0,
+      debug: result?.debug || [],
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Failed to run price checks" });
+  }
+};
+
+export const checkPriceByName = async (req, res) => {
+  try {
+    const title = req.body?.title;
+    const limit = Number.parseInt(req.body?.limit, 10) || 10;
+    const baselinePrice = parseNumericPrice(req.body?.baselinePrice);
+    const notifyOnDrop = req.body?.notifyOnDrop === true;
+    const result = await checkPriceByProductName({ title, limit });
+
+    let notification = {
+      attempted: false,
+      sent: false,
+      reason: null,
+    };
+
+    const bestPrice = result?.bestPrice?.price;
+    const isDrop =
+      typeof bestPrice === "number" &&
+      typeof baselinePrice === "number" &&
+      bestPrice < baselinePrice;
+
+    if (notifyOnDrop) {
+      notification.attempted = true;
+      if (!isDrop) {
+        notification.reason = "not_dropped";
+      } else if (!req.user?.expoPushToken) {
+        notification.reason = "push_token_missing";
+      } else {
+        await sendPriceDropPush({
+          expoPushToken: req.user.expoPushToken,
+          productName: title || "Wishlist item",
+          savedPrice: baselinePrice,
+          currentPrice: bestPrice,
+          productUrl: result?.bestPrice?.link || null,
+        });
+        notification.sent = true;
+        notification.reason = "sent";
+      }
+    }
+
+    return res.json({
+      ...result,
+      baselinePrice: baselinePrice ?? null,
+      isPriceDrop: Boolean(isDrop),
+      notification,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      success: false,
+      message: "Price check failed",
       error: error.message,
     });
   }

@@ -285,3 +285,27 @@ export const deleteAccount = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const savePushToken = async (req, res) => {
+  try {
+    const token = String(req.body?.token || "").trim();
+    if (!token) {
+      return res.status(400).json({ message: "Push token is required" });
+    }
+
+    await db.collection("users").updateOne(
+      { _id: req.user._id },
+      {
+        $set: {
+          expoPushToken: token,
+          pushTokenUpdatedAt: new Date(),
+        },
+      }
+    );
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Failed to save push token" });
+  }
+};

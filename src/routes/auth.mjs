@@ -6,6 +6,7 @@ import {
   getMe,
   login,
   resetPassword,
+  savePushToken,
   signup,
   deleteAccount,
 } from "../controllers/auth.mjs";
@@ -19,6 +20,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/change-password", checkAuth, changePassword);
 router.delete("/delete-account", checkAuth, deleteAccount);
+router.post("/push-token", checkAuth, savePushToken);
 
 export default router;
 // At the bottom of auth.mjs
