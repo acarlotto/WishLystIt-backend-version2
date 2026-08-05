@@ -51,6 +51,7 @@ import { Resend } from "resend";
 import AuthRouter from "./routes/auth.mjs";
 import ItemsRouter from "./routes/items.mjs";
 import ShareRouter from "./routes/share.mjs";
+import PartnershipsRouter from "./routes/partnerships.mjs";
 import { startPriceCheckScheduler } from "./services/priceAlerts.mjs";
 
 dotenv.config();
@@ -82,6 +83,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/items", ItemsRouter);
 app.use("/api/v1/share", ShareRouter);
+app.use("/api/v1/partnerships", PartnershipsRouter);
 startPriceCheckScheduler();
 
 const port = Number.parseInt(process.env.PORT || "3500", 10);

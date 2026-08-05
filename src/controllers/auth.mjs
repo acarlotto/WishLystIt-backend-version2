@@ -33,6 +33,7 @@ export const getMe = async (req, res) => {
   try {
     res.json({
       user: {
+        _id: req.user._id.toString(),
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         email: req.user.email,
@@ -68,6 +69,7 @@ export const login = async (req, res) => {
     // send token
     res.json({
       user: {
+        _id: user._id.toString(),
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
@@ -277,6 +279,27 @@ export const deleteAccount = async (req, res) => {
       db.collection("items").deleteMany({ userId }),
       db.collection("sharing").deleteMany({ userId }),
       db.collection("password-reset-codes").deleteMany({ userId }),
+      db.collection("partnerships").updateMany(
+        {
+          status: "accepted",
+          $or: [{ userId1: userId }, { userId2: userId }],
+        },
+        { $set: { status: "unlinked", unlinkedAt: new Date() } }
+      ),
+      db.collection("partnerships").updateMany(
+        {
+          status: "pending",
+          $or: [{ userId1: userId }, { invitedBy: userId }],
+        },
+        {
+          $set: {
+            status: "declined",
+            declinedAt: new Date(),
+            inviteCode: null,
+            inviteCodeExpiresAt: null,
+          },
+        }
+      ),
     ]);
 
     res.json({ message: "Account deleted successfully" });
